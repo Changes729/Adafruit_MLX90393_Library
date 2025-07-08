@@ -314,21 +314,22 @@ bool Adafruit_MLX90393::startSingleMeasurement(void) {
  *
  * @return True on command success
  */
-bool Adafruit_MLX90393::readMeasurement(float *x, float *y, float *z) {
+bool Adafruit_MLX90393::readMeasurement(float *x, float *y, float *z, float *t) {
   uint8_t tx[1] = {MLX90393_REG_RM | MLX90393_AXIS_ALL};
-  uint8_t rx[6] = {0};
+  uint8_t rx[8] = {0};
 
   /* Read a single data sample. */
   if (transceive(tx, sizeof(tx), rx, sizeof(rx), 0) != MLX90393_STATUS_OK) {
     return false;
   }
 
-  int16_t xi, yi, zi;
+  int16_t ti, xi, yi, zi;
 
   /* Convert data to uT and float. */
-  xi = (rx[0] << 8) | rx[1];
-  yi = (rx[2] << 8) | rx[3];
-  zi = (rx[4] << 8) | rx[5];
+  ti = (rx[0] << 8) | rx[1];
+  xi = (rx[2] << 8) | rx[3];
+  yi = (rx[4] << 8) | rx[5];
+  zi = (rx[6] << 8) | rx[7];
 
   if (_res_x == MLX90393_RES_18)
     xi -= 0x8000;
@@ -346,6 +347,9 @@ bool Adafruit_MLX90393::readMeasurement(float *x, float *y, float *z) {
   *x = (float)xi * mlx90393_lsb_lookup[0][_gain][_res_x][0];
   *y = (float)yi * mlx90393_lsb_lookup[0][_gain][_res_y][0];
   *z = (float)zi * mlx90393_lsb_lookup[0][_gain][_res_z][1];
+  if(t != nullptr) {
+    *t = 25 + (ti - 46244.f)/45.2f;
+  }
 
   return true;
 }
@@ -359,7 +363,7 @@ bool Adafruit_MLX90393::readMeasurement(float *x, float *y, float *z) {
  *
  * @return True if the operation succeeded, otherwise false.
  */
-bool Adafruit_MLX90393::readData(float *x, float *y, float *z) {
+bool Adafruit_MLX90393::readData(float *x, float *y, float *z, float *t) {
   if (!startSingleMeasurement())
     return false;
   // See MLX90393 Getting Started Guide for fancy formula
@@ -367,7 +371,7 @@ bool Adafruit_MLX90393::readData(float *x, float *y, float *z) {
   // For now, using Table 18 from datasheet
   // Without +10ms delay measurement doesn't always seem to work
   delay(mlx90393_tconv[_dig_filt][_osr] + 10);
-  return readMeasurement(x, y, z);
+  return readMeasurement(x, y, z, t);
 }
 
 bool Adafruit_MLX90393::writeRegister(uint8_t reg, uint16_t data) {

@@ -25,7 +25,7 @@
 
 #define MLX90393_DEFAULT_ADDR (0x0C) /* Can also be 0x18, depending on IC */
 
-#define MLX90393_AXIS_ALL (0x0E)      /**< X+Y+Z axis bits for commands. */
+#define MLX90393_AXIS_ALL (0x0F)      /**< X+Y+Z axis bits for commands. */
 #define MLX90393_CONF1 (0x00)         /**< Gain */
 #define MLX90393_CONF2 (0x01)         /**< Burst, comm mode */
 #define MLX90393_CONF3 (0x02)         /**< Oversampling, filter, res. */
@@ -77,7 +77,8 @@ typedef enum mlx90393_resolution {
 typedef enum mlx90393_axis {
   MLX90393_X,
   MLX90393_Y,
-  MLX90393_Z
+  MLX90393_Z,
+  MLX90393_T
 } mlx90393_axis_t;
 
 /** Digital filter settings for CONF3 register. */
@@ -178,7 +179,7 @@ public:
   bool reset(void);
   bool exitMode(void);
 
-  bool readMeasurement(float *x, float *y, float *z);
+  bool readMeasurement(float *x, float *y, float *z, float *t);
   bool startSingleMeasurement(void);
 
   bool setGain(enum mlx90393_gain gain);
@@ -194,7 +195,7 @@ public:
   enum mlx90393_oversampling getOversampling(void);
 
   bool setTrigInt(bool state);
-  bool readData(float *x, float *y, float *z);
+  bool readData(float *x, float *y, float *z, float *t = nullptr);
 
   bool getEvent(sensors_event_t *event);
   void getSensor(sensor_t *sensor);
