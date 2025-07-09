@@ -323,10 +323,11 @@ bool Adafruit_MLX90393::readMeasurement(float *x, float *y, float *z, float *t) 
     return false;
   }
 
-  int16_t ti, xi, yi, zi;
+  int16_t xi, yi, zi;
+  uint16_t ti;
 
   /* Convert data to uT and float. */
-  ti = (rx[0] << 8) | rx[1];
+  ti = (uint16_t(rx[0]) << 8) | rx[1];
   xi = (rx[2] << 8) | rx[3];
   yi = (rx[4] << 8) | rx[5];
   zi = (rx[6] << 8) | rx[7];
